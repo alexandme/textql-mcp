@@ -1,0 +1,12 @@
+# MCP SDK requirements
+mcp>=1.6.0
+fastapi>=0.95.0
+uvicorn>=0.22.0
+
+# Core dependencies
+toml
+pyyaml
+
+# Optional dependencies (for extensions)
+langchain
+google-cloud-aiplatform
