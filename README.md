@@ -16,9 +16,7 @@ This library provides a standardized interface for AI models and agents to inter
 
 ## Installation
 
-```bash
-pip install textql-mcp
-```
+
 
 ## Quick Start
 
