@@ -1,0 +1,5 @@
+# Google Spanner dependencies for TextQL MCP
+google-auth
+google-cloud-spanner
+langchain-google-spanner>=0.0.1
+langchain-google-vertexai>=0.1.0
