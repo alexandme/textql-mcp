@@ -1,19 +1,7 @@
-# MCP SDK requirements
-mcp>=1.6.0
-fastapi>=0.95.0
-uvicorn>=0.22.0
-
-# Core dependencies
-toml
-pyyaml
-
-# LangChain dependencies
-langchain
-langchain-core
-
-# Google Cloud dependencies
-google-cloud-aiplatform
-
-# Google Spanner dependencies (optional)
-# Install with: pip install -r requirements-spanner.txt
-# or: pip install .[spanner]
+langchain>=0.3.24
+google-cloud-aiplatform>=1.90.0
+neo4j>=5.28.1
+streamlit>=1.9.0
+pytest>=8.3.5
+black>=25.1.0
+ruff>=0.11.7

@@ -16,6 +16,32 @@ This library provides a standardized interface for AI models and agents to inter
 
 ## Installation
 
+### Option 1: Using Conda (Recommended)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/textql-mcp.git
+   cd textql-mcp
+   ```
+
+2. Set up the conda environment (requires conda to be installed):
+   ```bash
+   source setup_env.sh
+   ```
+   This will create a new conda environment named `textql` with all required dependencies.
+
+### Option 2: Using pip
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/textql-mcp.git
+   cd textql-mcp
+   ```
+
+2. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 
 ## Quick Start
