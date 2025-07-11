@@ -1,9 +1,11 @@
 ---
 id: task-9
 title: Define GraphQL Schema for TextQL MCP Integration
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@alexanderalyushin'
 created_date: '2025-07-11'
+updated_date: '2025-07-11'
 labels: []
 dependencies:
   - task-8
