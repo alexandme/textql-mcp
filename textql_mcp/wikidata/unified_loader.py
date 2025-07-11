@@ -185,4 +185,4 @@ class UnifiedLoader:
 
 if __name__ == "__main__":
     loader = UnifiedLoader("config/wikidata_poc.yaml")
-    loader.run(dry_run=True, limit=100)  # Test with small dry run
+    loader.run(dry_run=False, limit=100)  # Test with small dry run
