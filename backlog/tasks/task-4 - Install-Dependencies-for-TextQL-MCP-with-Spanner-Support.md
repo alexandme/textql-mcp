@@ -1,9 +1,11 @@
 ---
 id: task-4
 title: Install Dependencies for TextQL MCP with Spanner Support
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@alexanderalyushin'
 created_date: '2025-07-11'
+updated_date: '2025-07-11'
 labels: []
 dependencies: []
 ---
