@@ -1,0 +1,115 @@
+# Wikidata to Spanner Graph Pipeline Configuration
+# This configuration drives the ingestion and server processes for the TextQL MCP integration
+
+# Google Cloud Platform Settings
+gcp:
+  project_id: imperial-ally-429713-v1
+  
+  # Spanner Configuration
+  spanner:
+    instance_id: wikidata-graph-instance  # To be created in task-7
+    database_id: wikidata-graph-db        # To be created in task-7
+    
+  # BigQuery Configuration (from task-5)
+  bigquery:
+    dataset_id: wikidata_slice
+    views:
+      entities: v_unified_entities
+      edges: v_extracted_edges
+    raw_tables:
+      entities: raw_entities
+      edges: raw_edges
+    
+  # Vertex AI Configuration for TextQL MCP
+  vertex_ai:
+    location: us-central1
+    model: gemini-pro
+    # Alternative models can be specified:
+    # - gemini-1.5-pro
+    # - gemini-1.5-flash
+    
+# Authentication Settings
+auth:
+  # Path to service account key (from task-3)
+  service_account_key: spanner-graph-sa-key.json
+  # Environment variable is set automatically: GOOGLE_APPLICATION_CREDENTIALS
+  
+# Pipeline Configuration
+pipeline:
+  # Ingestion settings
+  ingestion:
+    batch_size: 1000              # Number of entities to process in each batch
+    max_workers: 4                # Number of parallel workers for ingestion
+    retry_attempts: 3             # Number of retry attempts for failed operations
+    
+  # Entity processing settings
+  entities:
+    max_entities: 50000           # Total entities to ingest (matching task-5 subset)
+    include_properties: true      # Include all entity properties
+    include_labels: true          # Include multilingual labels
+    include_descriptions: true    # Include multilingual descriptions
+    
+  # Edge processing settings
+  edges:
+    include_edge_types:
+      - WORKED_AT
+      - CITIZEN_OF
+      - EDUCATED_AT
+      - MEMBER_OF
+    create_reverse_edges: false   # Whether to create reverse edges
+    
+# Server Configuration
+server:
+  # MCP Server settings
+  mcp:
+    name: TextQL-MCP-Wikidata-Spanner
+    host: 0.0.0.0
+    port: 8000
+    
+  # Query settings
+  query:
+    max_results: 1000            # Maximum results per query
+    timeout_seconds: 30          # Query timeout
+    enable_caching: true         # Enable query result caching
+    
+  # GraphQL schema settings
+  graphql:
+    auto_generate_schema: true   # Auto-generate from Spanner schema
+    enable_introspection: true   # Enable GraphQL introspection
+    
+# Monitoring and Logging
+monitoring:
+  # Logging configuration
+  logging:
+    level: INFO                  # Log level (DEBUG, INFO, WARNING, ERROR)
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    
+  # Metrics collection
+  metrics:
+    enable: true
+    export_interval_seconds: 60
+    
+# Development Settings
+development:
+  # Python environment (from task-4)
+  conda_env: textql-mcp
+  python_version: "3.11"
+  
+  # Debug settings
+  debug:
+    enable_profiling: false
+    log_sql_queries: false
+    
+# Data Quality Settings
+data_quality:
+  # Validation rules
+  validation:
+    check_entity_completeness: true
+    check_edge_integrity: true
+    reject_orphan_edges: true
+    
+  # Data enrichment
+  enrichment:
+    infer_missing_types: true
+    normalize_dates: true
+    extract_coordinates: true
