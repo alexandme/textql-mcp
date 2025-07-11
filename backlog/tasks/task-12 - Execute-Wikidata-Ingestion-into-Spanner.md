@@ -73,3 +73,5 @@ Pipeline: Fully functional
 ```
 
 The pipeline is ready for TextQL MCP server integration. Future work should consider creating connected subgraphs using graph traversal from seed entities.
+
+Update task task-12 - Execute Wikidata Ingestion into Spanner with implementation notes
