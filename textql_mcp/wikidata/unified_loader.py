@@ -45,15 +45,11 @@ class UnifiedLoader:
         description = row.get("description")
         confidence_score = 1.0  # Default
 
-        # Collect other fields into type_specific_attributes
-        type_specific = {
-            k: v
-            for k, v in row.items()
-            if k not in ["id", "primary_instance_of_id", "label", "description"]
-        }
-        type_specific_json = json.dumps(type_specific) if type_specific else None
+        # type_specific_attributes is already JSON from BigQuery
+        type_specific_json = row.get("type_specific_attributes")
 
-        raw_claims_json = json.dumps(row.get("claims", {})) if "claims" in row else None
+        # raw_claims is already JSON from BigQuery if present
+        raw_claims_json = row.get("raw_claims")
 
         return [
             vid,
