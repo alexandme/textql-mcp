@@ -15,7 +15,7 @@ gcp:
     dataset_id: wikidata_slice
     views:
       entities: v_unified_entities
-      edges: v_extracted_edges
+      edges: v_extracted_edges_demo  # Using demo edges for POC
     raw_tables:
       entities: raw_entities
       edges: raw_edges
