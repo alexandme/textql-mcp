@@ -46,10 +46,29 @@ class UnifiedLoader:
         confidence_score = 1.0  # Default
 
         # type_specific_attributes is already JSON from BigQuery
+        # but needs to be validated and re-serialized for Spanner batch operations
         type_specific_json = row.get("type_specific_attributes")
+        if type_specific_json:
+            try:
+                # Parse and re-serialize to ensure valid JSON format
+                parsed = json.loads(type_specific_json)
+                type_specific_json = json.dumps(parsed, ensure_ascii=False)
+            except json.JSONDecodeError:
+                logger.warning(
+                    f"Invalid JSON in type_specific_attributes for entity {vid}"
+                )
+                type_specific_json = None
 
         # raw_claims is already JSON from BigQuery if present
+        # Apply same validation and re-serialization
         raw_claims_json = row.get("raw_claims")
+        if raw_claims_json:
+            try:
+                parsed = json.loads(raw_claims_json)
+                raw_claims_json = json.dumps(parsed, ensure_ascii=False)
+            except json.JSONDecodeError:
+                logger.warning(f"Invalid JSON in raw_claims for entity {vid}")
+                raw_claims_json = None
 
         return [
             vid,
