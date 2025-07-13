@@ -1,7 +1,7 @@
 ---
 id: task-13
 title: Set Up TextQL MCP Server with Spanner Backend
-status: In Progress
+status: Done
 assignee:
   - '@me'
 created_date: '2025-07-11'
@@ -21,9 +21,9 @@ Configure and run the TextQL MCP server to query the Spanner graph database usin
 
 ## Acceptance Criteria
 
-- [ ] Server is implemented using the provided API code
-- [ ] Server is running on host 0.0.0.0 port 8000
-- [ ] Basic connectivity is verified using curl or MCP client
+- [x] Server is implemented using the provided API code
+- [x] Server is running on host 0.0.0.0 port 8000
+- [x] Basic connectivity is verified using curl or MCP client
 
 ## Implementation Plan
 
