@@ -1,15 +1,18 @@
 ---
 id: task-13
 title: Set Up TextQL MCP Server with Spanner Backend
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@me'
 created_date: '2025-07-11'
+updated_date: '2025-07-13'
 labels: []
 dependencies:
   - task-4
   - task-6
   - task-9
   - task-12
+  - task-19
 ---
 
 ## Description
