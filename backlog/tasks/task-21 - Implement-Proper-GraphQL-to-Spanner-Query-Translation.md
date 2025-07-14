@@ -1,7 +1,7 @@
 ---
 id: task-21
 title: Implement Proper GraphQL-to-Spanner Query Translation
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-07-14'
 updated_date: '2025-07-14'
