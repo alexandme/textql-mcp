@@ -1,9 +1,11 @@
 ---
 id: task-20
 title: Fix MCP Server Path Handling for Cline Integration
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@alexanderalyushin'
 created_date: '2025-07-14'
+updated_date: '2025-07-14'
 labels: []
 dependencies:
   - task-13
