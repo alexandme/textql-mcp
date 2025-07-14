@@ -13,8 +13,11 @@ import logging
 import yaml
 from pathlib import Path
 
+# Get the directory where this script is located
+SCRIPT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+
 # Make sure textql_mcp is in the path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, str(SCRIPT_DIR))
 
 from textql_mcp.main import create_mcp_server_with_spanner, run_server
 from textql_mcp.utils.ambiguity_detector import SimpleAmbiguityDetector
@@ -29,8 +32,18 @@ logging.basicConfig(
 logger = logging.getLogger("spanner_wikidata_server")
 
 
-def load_config(config_path: str = "config/wikidata_poc.yaml") -> dict:
+def load_config(config_path: str = None) -> dict:
     """Load configuration from YAML file."""
+    if config_path is None:
+        # Default to config/wikidata_poc.yaml relative to script directory
+        config_path = SCRIPT_DIR / "config" / "wikidata_poc.yaml"
+    else:
+        config_path = Path(config_path)
+        # If the path is relative, make it relative to the script directory
+        if not config_path.is_absolute():
+            config_path = SCRIPT_DIR / config_path
+
+    logger.debug(f"Loading configuration from: {config_path}")
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
 

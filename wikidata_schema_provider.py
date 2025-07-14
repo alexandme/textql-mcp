@@ -6,32 +6,45 @@ This provider uses the GraphQL schema defined for the Wikidata-to-Spanner pipeli
 import os
 import logging
 from typing import Dict, Any, Optional
+from pathlib import Path
 
 from textql_mcp.utils.schema_provider import FileSchemaProvider
 
 logger = logging.getLogger("wikidata_schema_provider")
 
+# Get the directory where this script is located
+SCRIPT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+
 
 class WikidataSchemaProvider:
     """Schema provider that uses the Wikidata GraphQL schema."""
 
-    def __init__(self, schema_file_path: str = "textql_mcp/schema.graphql"):
+    def __init__(self, schema_file_path: str = None):
         """
         Initialize the Wikidata schema provider.
 
         Args:
             schema_file_path: Path to the GraphQL schema file
         """
-        self.schema_file_path = schema_file_path
-        self._file_provider = FileSchemaProvider(schema_file_path)
+        if schema_file_path is None:
+            # Default to textql_mcp/schema.graphql relative to script directory
+            schema_file_path = SCRIPT_DIR / "textql_mcp" / "schema.graphql"
+        else:
+            schema_file_path = Path(schema_file_path)
+            # If the path is relative, make it relative to the script directory
+            if not schema_file_path.is_absolute():
+                schema_file_path = SCRIPT_DIR / schema_file_path
+
+        self.schema_file_path = str(schema_file_path)
+        self._file_provider = FileSchemaProvider(self.schema_file_path)
 
         # Check if schema file exists
-        if not os.path.exists(schema_file_path):
-            logger.error(f"Schema file not found: {schema_file_path}")
-            raise FileNotFoundError(f"Schema file not found: {schema_file_path}")
+        if not os.path.exists(self.schema_file_path):
+            logger.error(f"Schema file not found: {self.schema_file_path}")
+            raise FileNotFoundError(f"Schema file not found: {self.schema_file_path}")
 
         logger.info(
-            f"Initialized WikidataSchemaProvider with schema: {schema_file_path}"
+            f"Initialized WikidataSchemaProvider with schema: {self.schema_file_path}"
         )
 
     def get_schema(self, query: str, agent_type: str = "default") -> str:
