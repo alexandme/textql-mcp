@@ -9,21 +9,35 @@ import sys
 import logging
 from typing import Dict, Any, Optional
 
-from .core.server import create_mcp_server, SchemaProvider, QueryExecutor, AmbiguityDetector
-from .utils.schema_provider import FileSchemaProvider, StringSchemaProvider, MultiAgentSchemaProvider
+from .core.server import (
+    create_mcp_server,
+    SchemaProvider,
+    QueryExecutor,
+    AmbiguityDetector,
+)
+from .utils.schema_provider import (
+    FileSchemaProvider,
+    StringSchemaProvider,
+    MultiAgentSchemaProvider,
+)
 from .utils.query_executor import (
     DummyQueryExecutor,
     CallbackQueryExecutor,
     LLMQueryExecutor,
     SpannerQueryExecutor,
-    SPANNER_AVAILABLE
+    SPANNER_AVAILABLE,
 )
-from .utils.ambiguity_detector import SimpleAmbiguityDetector, RegexAmbiguityDetector, CallbackAmbiguityDetector
+from .utils.ambiguity_detector import (
+    SimpleAmbiguityDetector,
+    RegexAmbiguityDetector,
+    CallbackAmbiguityDetector,
+)
 
 # Try to import optional dependencies
 try:
     from google.cloud import spanner
     from langchain_google_vertexai import ChatVertexAI
+
     VERTEXAI_AVAILABLE = True
 except ImportError:
     VERTEXAI_AVAILABLE = False
@@ -87,11 +101,13 @@ def create_simple_server(
     elif schema_string is not None:
         schema_provider = StringSchemaProvider(schema_string)
     else:
-        schema_provider = StringSchemaProvider("""
+        schema_provider = StringSchemaProvider(
+            """
         type Query {
             example: String
         }
-        """)
+        """
+        )
 
     # Create query executor
     if query_executor_callback is not None:
@@ -170,14 +186,18 @@ def create_mcp_server_with_spanner(
     else:
         try:
             # Default to VertexAI if no instance provided
-            logger.info(f"Initializing default LLM: ChatVertexAI (model: {llm_model_name})")
+            logger.info(
+                f"Initializing default LLM: ChatVertexAI (model: {llm_model_name})"
+            )
             llm = ChatVertexAI(
                 project=llm_project_id,
                 location=llm_location,
                 model_name=llm_model_name,
             )
         except Exception as e:
-            logger.error(f"Failed to initialize default VertexAI LLM: {e}", exc_info=True)
+            logger.error(
+                f"Failed to initialize default VertexAI LLM: {e}", exc_info=True
+            )
             raise ValueError(f"LLM initialization failed: {e}") from e
 
     # --- Define the LLM Chain Provider Function ---
@@ -194,6 +214,7 @@ def create_mcp_server_with_spanner(
             graph_store = SpannerGraphStore(
                 instance_id=instance_id,
                 database_id=database_id,
+                graph_name="wikidata_graph",  # Add the required graph_name parameter
                 client=spanner.Client(project=spanner_project_id or llm_project_id),
             )
 
@@ -214,8 +235,7 @@ def create_mcp_server_with_spanner(
             """
 
             prompt = PromptTemplate(
-                input_variables=["query"],
-                template=graph_query_template
+                input_variables=["query"], template=graph_query_template
             )
 
             chain = LLMChain(llm=llm, prompt=prompt)
@@ -224,8 +244,13 @@ def create_mcp_server_with_spanner(
             return chain
 
         except Exception as e:
-            logger.error(f"Failed to create LLM chain for agent '{agent_type}': {e}", exc_info=True)
-            raise RuntimeError(f"Chain creation failed for agent '{agent_type}': {e}") from e
+            logger.error(
+                f"Failed to create LLM chain for agent '{agent_type}': {e}",
+                exc_info=True,
+            )
+            raise RuntimeError(
+                f"Chain creation failed for agent '{agent_type}': {e}"
+            ) from e
 
     # --- Initialize Spanner Query Executor ---
     spanner_executor = SpannerQueryExecutor(
@@ -239,7 +264,8 @@ def create_mcp_server_with_spanner(
     if schema_provider is None:
         # Default schema provider - can be enhanced to fetch from Spanner later
         logger.warning("No schema provider specified, using default string schema.")
-        schema_provider = StringSchemaProvider("""
+        schema_provider = StringSchemaProvider(
+            """
         type Query {
             # This is a placeholder schema
             # The actual schema would be derived from Spanner
@@ -264,7 +290,8 @@ def create_mcp_server_with_spanner(
             type: String!
             target: Entity
         }
-        """)
+        """
+        )
 
     if ambiguity_detector is None:
         ambiguity_detector = SimpleAmbiguityDetector()
