@@ -23,3 +23,7 @@ The MCP server fails to start when invoked by Cline/Claude because it uses relat
 - [ ] All MCP tools work correctly after path fixes
 - [ ] Manual server start still works from project directory
 - [ ] Server logs show correct absolute paths being used
+
+## Implementation Plan
+
+1. Update spanner_wikidata_server.py to determine script location and use absolute paths\n2. Modify load_config function to handle both relative and absolute paths\n3. Update wikidata_schema_provider.py to use absolute path for schema file\n4. Test manual server start from different directories\n5. Update Cline MCP configuration with correct Python path\n6. Test MCP integration with Cline
