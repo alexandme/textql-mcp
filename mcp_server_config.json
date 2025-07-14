@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "textql-wikidata-spanner": {
+      "command": "python",
+      "args": ["/Users/alexanderalyushin/Documents/Documents/Projects/textql-mcp/spanner_wikidata_server.py"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": ""
+      }
+    }
+  }
+}
