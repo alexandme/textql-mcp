@@ -23,4 +23,39 @@ Following MCP best practices, refactor the server to focus on simple tool execut
 
 ## Implementation Plan
 
-1. Enhance SchemaProvider for Spanner Schema Retrieval\n   - Add SpannerSchemaProvider to schema_provider.py that formats output as client-parseable string/JSON\n   - Instantiate it in main.py with project_id, instance_id, database_id\n   - Ensure get_schema_for_query returns formatted schema for client GQL generation\n\n2. Simplify QueryExecutor for Direct GQL Execution Only\n   - Remove all NL handling from SpannerQueryExecutor\n   - Update execute_query to assume inputs are valid Spanner GQL strings\n   - Execute GQL directly via graph_store.query() with proper graph clause\n   - Return structured results with error key for client iteration\n\n3. Remove NL Handling from get_spanner_llm_chain\n   - Deprecate or simplify the LLM chain factory\n   - Focus on direct execution via graph_store in QueryExecutor\n   - Remove any NL-to-GQL translation logic\n\n4. Update MCP Tools for Client-Driven Workflow\n   - Deprecate/repurpose translate_to_gql tool\n   - Update query_graph to execute client-generated GQL only\n   - Remove process_natural_language_query tool entirely\n   - Keep get_schema_for_query for client schema fetching\n\n5. Implement Error Handling and Optimization\n   - Always include error key in responses for client refinement\n   - Add query limits (e.g., LIMIT 100) if not specified\n   - Leverage Spanner indexes for performance\n\n6. Create Test Workflow\n   - Test client fetches schema via get_schema_for_query\n   - Test direct GQL execution for counts, entities, relationships\n   - Verify error responses enable client iteration\n\n7. Update Documentation\n   - Document client-driven workflow\n   - Provide example GQL queries for common operations\n   - Update server documentation to reflect MCP alignment
+1. Enhance SchemaProvider for Spanner Schema Retrieval
+   - Add SpannerSchemaProvider to schema_provider.py that formats output as client-parseable string/JSON
+   - Instantiate it in main.py with project_id, instance_id, database_id
+   - Ensure get_schema_for_query returns formatted schema for client GQL generation
+
+2. Simplify QueryExecutor for Direct GQL Execution Only
+   - Remove all NL handling from SpannerQueryExecutor
+   - Update execute_query to assume inputs are valid Spanner GQL strings
+   - Execute GQL directly via graph_store.query() with proper graph clause
+   - Return structured results with error key for client iteration
+
+3. Remove NL Handling from get_spanner_llm_chain
+   - Deprecate or simplify the LLM chain factory
+   - Focus on direct execution via graph_store in QueryExecutor
+   - Remove any NL-to-GQL translation logic
+
+4. Update MCP Tools for Client-Driven Workflow
+   - Deprecate/repurpose translate_to_gql tool
+   - Update query_graph to execute client-generated GQL only
+   - Remove process_natural_language_query tool entirely
+   - Keep get_schema_for_query for client schema fetching
+
+5. Implement Error Handling and Optimization
+   - Always include error key in responses for client refinement
+   - Add query limits (e.g., LIMIT 100) if not specified
+   - Leverage Spanner indexes for performance
+
+6. Create Test Workflow
+   - Test client fetches schema via get_schema_for_query
+   - Test direct GQL execution for counts, entities, relationships
+   - Verify error responses enable client iteration
+
+7. Update Documentation
+   - Document client-driven workflow
+   - Provide example GQL queries for common operations
+   - Update server documentation to reflect MCP alignment
