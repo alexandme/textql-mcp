@@ -7,7 +7,7 @@ created_date: '2025-07-14'
 updated_date: '2025-07-14'
 labels: []
 dependencies:
-  - task-20
+  - task-22
 ---
 
 ## Description
