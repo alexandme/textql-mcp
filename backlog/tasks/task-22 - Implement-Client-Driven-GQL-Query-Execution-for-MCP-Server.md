@@ -1,7 +1,7 @@
 ---
 id: task-22
 title: Implement Client-Driven GQL Query Execution for MCP Server
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2025-07-14'
 updated_date: '2025-07-14'
