@@ -19,6 +19,7 @@ from .utils.schema_provider import (
     FileSchemaProvider,
     StringSchemaProvider,
     MultiAgentSchemaProvider,
+    SpannerSchemaProvider,
 )
 from .utils.query_executor import (
     DummyQueryExecutor,

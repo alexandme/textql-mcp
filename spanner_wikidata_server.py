@@ -19,9 +19,9 @@ SCRIPT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 # Make sure textql_mcp is in the path
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from textql_mcp.main import create_mcp_server_with_spanner, run_server
+from textql_mcp.main_spanner import create_mcp_server_with_spanner
+from textql_mcp.core.server import run_server
 from textql_mcp.utils.ambiguity_detector import SimpleAmbiguityDetector
-from wikidata_schema_provider import WikidataSchemaProvider
 
 # Set up logging
 logging.basicConfig(
@@ -109,10 +109,6 @@ def main():
             logger.warning(f"Service account key not found: {service_account_path}")
             logger.warning("Falling back to Application Default Credentials")
 
-        # Create schema provider
-        logger.info("Initializing Wikidata schema provider")
-        schema_provider = WikidataSchemaProvider()
-
         # Create MCP server with Spanner backend
         logger.info(
             f"Creating TextQL MCP Server with Spanner: "
@@ -123,13 +119,10 @@ def main():
         server = create_mcp_server_with_spanner(
             instance_id=gcp_config["spanner"]["instance_id"],
             database_id=gcp_config["spanner"]["database_id"],
-            llm_project_id=gcp_config["project_id"],
-            llm_location=gcp_config["vertex_ai"]["location"],
-            llm_model_name=gcp_config["vertex_ai"]["model"],
-            schema_provider=schema_provider,
             ambiguity_detector=SimpleAmbiguityDetector(),
             server_name=server_config["mcp"]["name"],
             spanner_project_id=gcp_config["project_id"],
+            graph_name="wikidata_graph",
         )
 
         # Log server configuration
@@ -139,15 +132,19 @@ def main():
         logger.info(f"  Port: {port}")
         logger.info(f"  Spanner Instance: {gcp_config['spanner']['instance_id']}")
         logger.info(f"  Spanner Database: {gcp_config['spanner']['database_id']}")
-        logger.info(f"  VertexAI Model: {gcp_config['vertex_ai']['model']}")
-        logger.info(f"  VertexAI Location: {gcp_config['vertex_ai']['location']}")
+        logger.info(f"  Graph Name: wikidata_graph")
 
         # Run server
-        logger.info(f"Starting TextQL MCP Server on {host}:{port}")
+        logger.info(f"Starting TextQL MCP Server")
         logger.info("Server is ready to accept connections")
-        logger.info("Test with: curl http://localhost:8000/health")
 
-        run_server(server, host, port)
+        # Set environment variables for host and port if specified
+        if host:
+            os.environ["MCP_HOST"] = host
+        if port:
+            os.environ["MCP_PORT"] = str(port)
+
+        run_server(server)
 
     except FileNotFoundError as e:
         logger.error(f"Configuration file not found: {e}")

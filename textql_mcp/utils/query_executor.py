@@ -11,6 +11,7 @@ from typing import Dict, Any, Optional, List, Callable
 # Import Spanner-related libraries if SpannerQueryExecutor is used
 try:
     from google.cloud import spanner
+
     SPANNER_AVAILABLE = True
 except ImportError:
     SPANNER_AVAILABLE = False
@@ -120,21 +121,18 @@ class LLMQueryExecutor:
 
 class SpannerQueryExecutor:
     """
-    Query executor that uses Google Spanner, potentially via LangChain integrations.
-    It expects the 'query' input to be the final instruction or GQL query
-    as prepared by the calling MCP tool.
+    Query executor that executes GQL queries directly against Google Spanner.
+    This executor expects valid Spanner GQL queries and executes them without
+    any NL processing or translation.
     """
 
     def __init__(
         self,
         instance_id: str,
         database_id: str,
-        # Use a more specific type hint if possible (e.g., Chain from langchain)
-        # This function should return a configured LangChain chain instance ready to invoke
-        get_llm_chain: Callable[[str], Any],
         project_id: Optional[str] = None,
         spanner_client: Optional[Any] = None,
-        graph_name_prefix: str = "mcp_graph",
+        graph_name: str = "wikidata_graph",
     ):
         """
         Initialize a SpannerQueryExecutor.
@@ -142,12 +140,9 @@ class SpannerQueryExecutor:
         Args:
             instance_id: The Google Spanner instance ID.
             database_id: The Google Spanner database ID.
-            get_llm_chain: A callable that takes an agent_type (str) and returns
-                           a configured LangChain chain instance capable of processing
-                           the input query against the Spanner graph.
             project_id: Google Cloud project ID (optional, defaults to ADC).
             spanner_client: Optional pre-configured Spanner client.
-            graph_name_prefix: Prefix for naming graphs in Spanner (e.g., per agent).
+            graph_name: Name of the graph in Spanner.
         """
         if not SPANNER_AVAILABLE:
             raise ImportError(
@@ -157,18 +152,17 @@ class SpannerQueryExecutor:
 
         if not instance_id or not database_id:
             raise ValueError("instance_id and database_id are required.")
-        if not callable(get_llm_chain):
-             raise TypeError("get_llm_chain must be a callable function.")
 
         self.instance_id = instance_id
         self.database_id = database_id
         self.project_id = project_id
-        self._get_llm_chain = get_llm_chain
-        self.graph_name_prefix = graph_name_prefix
+        self.graph_name = graph_name
 
         # Initialize Google Spanner client
         try:
-            self.spanner_client = spanner_client or spanner.Client(project=self.project_id)
+            self.spanner_client = spanner_client or spanner.Client(
+                project=self.project_id
+            )
             logger.info(
                 f"Initialized SpannerQueryExecutor for instance='{instance_id}', "
                 f"database='{database_id}'"
@@ -180,13 +174,13 @@ class SpannerQueryExecutor:
         # Cache for graph stores per agent type to avoid re-initialization
         self._graph_store_cache = {}
 
-    def _get_graph_store(self, agent_type: str) -> Any:
-        """Gets or initializes the SpannerGraphStore for a given agent type."""
+    def _get_graph_store(self, agent_type: str = "default") -> Any:
+        """Gets or initializes the SpannerGraphStore."""
         if agent_type not in self._graph_store_cache:
             try:
-                # Construct a unique graph name per agent if needed
-                graph_name = f"{self.graph_name_prefix}_{agent_type}"
-                logger.info(f"Initializing SpannerGraphStore for agent '{agent_type}' with graph name '{graph_name}'")
+                logger.info(
+                    f"Initializing SpannerGraphStore for graph '{self.graph_name}'"
+                )
 
                 # Import here to avoid dependency issues if not installed
                 from langchain_google_spanner import SpannerGraphStore
@@ -194,70 +188,73 @@ class SpannerQueryExecutor:
                 self._graph_store_cache[agent_type] = SpannerGraphStore(
                     instance_id=self.instance_id,
                     database_id=self.database_id,
-                    # graph_name=graph_name, # Include if supported/needed
+                    graph_name=self.graph_name,
                     client=self.spanner_client,
                 )
             except Exception as e:
-                logger.error(f"Failed to initialize SpannerGraphStore for agent '{agent_type}': {e}", exc_info=True)
-                raise RuntimeError(f"SpannerGraphStore initialization failed for agent '{agent_type}': {e}") from e
+                logger.error(
+                    f"Failed to initialize SpannerGraphStore: {e}",
+                    exc_info=True,
+                )
+                raise RuntimeError(
+                    f"SpannerGraphStore initialization failed: {e}"
+                ) from e
         return self._graph_store_cache[agent_type]
 
     def execute_query(self, query: str, agent_type: str = "default") -> Dict[str, Any]:
         """
-        Executes a query (which could be a natural language prompt intended for an LLM
-        chain or a direct GQL query string) using the configured LangChain chain
-        associated with the agent_type, interacting with Google Spanner.
+        Execute a GQL query directly against the Spanner graph.
 
         Args:
-            query: The query/prompt string provided by the MCP tool.
-            agent_type: The agent type identifier, used to select the appropriate
-                        LLM chain and potentially graph configuration.
+            query: The GQL query string to execute
+            agent_type: The agent type identifier
 
         Returns:
-            Query results as a dictionary, expected to contain at least 'result'
-            and optionally 'intermediate_steps' or 'error'.
+            Query results as a dictionary containing 'result' and 'error' keys
         """
-        logger.info(f"Executing Spanner query/prompt for agent_type='{agent_type}'")
-        logger.debug(f"Input query/prompt: {query[:200]}...") # Log truncated query
+        logger.info(f"Executing direct Spanner GQL for agent_type='{agent_type}'")
+        logger.debug(f"GQL query: {query[:200]}...")
 
         try:
-            # 1. Get the appropriate LangChain chain for this agent type
-            # This chain should be pre-configured (e.g., in the factory function)
-            # to use the SpannerGraphStore and the LLM.
-            chain = self._get_llm_chain(agent_type)
-            if not chain:
-                 raise ValueError(f"No LLM chain configured for agent_type '{agent_type}'")
+            # Get the graph store
+            graph_store = self._get_graph_store(agent_type)
 
-            # Optional: Get/ensure the graph store is initialized (needed if chain doesn't handle it)
-            # graph_store = self._get_graph_store(agent_type) # May not be needed if chain uses it internally
+            # Add LIMIT if not present (for safety)
+            query_lower = query.lower()
+            if "limit" not in query_lower and "count" not in query_lower:
+                query = query.strip()
+                if query.endswith(";"):
+                    query = query[:-1]
+                query += " LIMIT 100"
 
-            # 2. Execute the query/prompt using the LangChain chain
-            # The chain is responsible for NL->GQL translation (if needed),
-            # query execution against SpannerGraphStore, and result formatting.
-            # The specific input format (e.g., {'query': query}) depends on the chain type.
-            logger.info(f"Invoking LLM chain for agent_type '{agent_type}'")
-            # Example invocation, adjust based on the actual chain's expected input
-            result_data = chain.invoke({"query": query})
+            # Ensure GRAPH clause is present
+            if "graph" not in query_lower:
+                query += f" GRAPH {self.graph_name}"
 
-            # 3. Format the result
-            # Ensure the output conforms to the expected dictionary structure
-            if isinstance(result_data, dict):
-                # If the chain already returns the desired dict format
-                 if 'result' not in result_data:
-                      # Adapt if result is under a different key
-                      result_data = {'result': str(result_data), 'intermediate_steps': result_data.get('intermediate_steps', [])}
-            else:
-                # If the chain returns a simple string or other type
-                result_data = {"result": str(result_data), "intermediate_steps": []}
+            logger.info(f"Executing GQL: {query}")
+
+            # Execute the GQL query directly
+            raw_results = graph_store.query(query)
+
+            # Format results
+            import json
+
+            result_data = {
+                "result": json.dumps(raw_results, default=str),
+                "intermediate_steps": [],
+            }
 
             logger.info(f"Query execution successful for agent_type='{agent_type}'")
             logger.debug(f"Result: {str(result_data)[:200]}...")
             return result_data
 
         except Exception as e:
-            logger.error(f"Error executing query via chain for agent_type '{agent_type}': {e}", exc_info=True)
+            logger.error(
+                f"GQL execution failed for agent_type '{agent_type}': {e}",
+                exc_info=True,
+            )
             return {
-                "result": f"Error during Spanner query execution: {e}",
+                "result": "",
                 "intermediate_steps": [],
-                "error": str(e),
+                "error": str(e),  # Clients use this to iterate/refine GQL
             }
