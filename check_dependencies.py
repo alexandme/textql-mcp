@@ -38,7 +38,7 @@ def check_authentication():
 
     try:
         credentials, project = default()
-        print(f"✓ Default credentials found")
+        print("✓ Default credentials found")
         print(f"  Project: {project}")
 
         # Check if service account key is set
@@ -67,7 +67,7 @@ def check_spanner_connectivity(project_id):
         instance = spanner_client.instance(instance_id)
         database = instance.database(database_id)
 
-        print(f"✓ Connected to Spanner")
+        print("✓ Connected to Spanner")
         print(f"  Instance: {instance_id}")
         print(f"  Database: {database_id}")
 

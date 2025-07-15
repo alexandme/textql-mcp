@@ -126,16 +126,16 @@ def main():
         )
 
         # Log server configuration
-        logger.info(f"Server configuration:")
+        logger.info("Server configuration:")
         logger.info(f"  Name: {server_config['mcp']['name']}")
         logger.info(f"  Host: {host}")
         logger.info(f"  Port: {port}")
         logger.info(f"  Spanner Instance: {gcp_config['spanner']['instance_id']}")
         logger.info(f"  Spanner Database: {gcp_config['spanner']['database_id']}")
-        logger.info(f"  Graph Name: wikidata_graph")
+        logger.info("  Graph Name: wikidata_graph")
 
         # Run server
-        logger.info(f"Starting TextQL MCP Server")
+        logger.info("Starting TextQL MCP Server")
         logger.info("Server is ready to accept connections")
 
         # Set environment variables for host and port if specified

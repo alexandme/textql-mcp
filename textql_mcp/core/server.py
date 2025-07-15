@@ -8,7 +8,7 @@ for sending GraphQL queries and translating natural language to GQL.
 import os
 import sys
 import logging
-from typing import Dict, Any, Optional, List, AsyncIterator, Type, Protocol, Callable
+from typing import Dict, Any, Optional, AsyncIterator, Protocol
 from dataclasses import dataclass
 from contextlib import asynccontextmanager
 import re
@@ -373,7 +373,7 @@ def create_mcp_server(
         # Progress reporting
         if ctx:
             try:
-                ctx.info(f"Executing GraphQL query")
+                ctx.info("Executing GraphQL query")
                 ctx.report_progress(0, 1)
             except Exception as e:
                 logger.warning(f"Error reporting progress: {e}")

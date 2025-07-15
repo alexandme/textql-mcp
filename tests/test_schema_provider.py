@@ -4,7 +4,6 @@ Tests for the schema provider implementations.
 
 import os
 import tempfile
-import pytest
 
 from textql_mcp.utils.schema_provider import (
     FileSchemaProvider,

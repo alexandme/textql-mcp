@@ -42,7 +42,7 @@ Core components:
 - **Factory and Core Logic**: `main_spanner.py` and `core/server.py` for creating and running the MCP server with Spanner-specific implementations.
 - **Utilities**: Modular classes in `utils/` for query execution, schema provision, and ambiguity detection.
 - **Configuration**: YAML files (e.g., `config/wikidata_poc.yaml`) for Spanner credentials and settings.
-- **Integrations**: Google Cloud Spanner via `langchain_google_spanner` for database interactions.
+- **Integrations**: Google Cloud Spanner via direct `google-cloud-spanner` client for database interactions.
 
 Data flow:
 1. Client sends GQL query via MCP tool (e.g., `query_graph`).
@@ -102,9 +102,11 @@ Code flow example (from client request to response):
 
 ### Utilities
 - **`textql_mcp/utils/query_executor.py`**: `SpannerQueryExecutor` class.
-  - Executes SQL queries via `SpannerGraphStore`.
+  - Executes SQL queries via direct Spanner database snapshots.
+  - Uses `database.snapshot().execute_sql()` for read-only query execution.
   - Currently uses standard SQL without GRAPH clause (e.g., queries 'entities' and 'edges' tables as relational data).
   - Adds "LIMIT 100" for safety if absent.
+  - Caches database instances per agent type for efficiency.
 
 - **`textql_mcp/utils/schema_provider.py`** and **`schema_provider_spanner.py`**: `SpannerSchemaProvider`.
   - Provides JSON schema info, including table structures (entities, edges) and example queries.
@@ -115,11 +117,12 @@ Code flow example (from client request to response):
 ## Integrations
 
 ### Google Cloud Spanner
-- **Setup**: Uses `langchain_google_spanner` for `SpannerGraphStore`.
+- **Setup**: Uses direct `google-cloud-spanner` client for database operations.
 - **Schema**: Unified tables – 'entities' for vertices, 'edges' for relationships.
-- **Query Execution**: Standard SQL on graph-like data (no native GRAPH support currently).
+- **Query Execution**: Standard SQL on graph-like data via database snapshots (no native GRAPH support currently).
 - **Authentication**: Service accounts or Application Default Credentials (ADC).
 - **Configuration**: YAML specifies project ID, instance, database, etc.
+- **Implementation Note**: As of task-23, the system no longer depends on `langchain-google-spanner` wrapper, using the native Google Cloud Spanner client directly for better control and reduced dependencies.
 
 ### MCP Protocol
 - Tools: `query_graph` for direct GQL execution, `get_schema_for_query` for schema subsets.

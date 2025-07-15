@@ -29,11 +29,11 @@ logger = logging.getLogger("simple_server")
 def dummy_query_executor(query: str, agent_type: str) -> Dict[str, Any]:
     """
     Dummy query executor function for demonstration purposes.
-    
+
     Args:
         query: The query to execute
         agent_type: The agent type identifier
-        
+
     Returns:
         Dict containing the query results
     """
@@ -49,8 +49,11 @@ def dummy_query_executor(query: str, agent_type: str) -> Dict[str, Any]:
             }
             """,
             "intermediate_steps": [
-                {"type": "query_translation", "gql": "{ employees(department: \"Sales\") { id, name, position } }"},
-                {"type": "execution", "status": "success"}
+                {
+                    "type": "query_translation",
+                    "gql": '{ employees(department: "Sales") { id, name, position } }',
+                },
+                {"type": "execution", "status": "success"},
             ],
         }
     else:
@@ -58,7 +61,7 @@ def dummy_query_executor(query: str, agent_type: str) -> Dict[str, Any]:
             "result": "No data found for the given query",
             "intermediate_steps": [
                 {"type": "query_translation", "gql": query},
-                {"type": "execution", "status": "no_results"}
+                {"type": "execution", "status": "no_results"},
             ],
         }
 
@@ -90,23 +93,23 @@ def main():
       department(id: ID!): Department
     }
     """
-    
+
     # Create schema provider
     schema_provider = StringSchemaProvider(schema)
-    
+
     # Create query executor
     query_executor = DummyQueryExecutor()
-    
+
     # Create ambiguity detector
     ambiguity_detector = SimpleAmbiguityDetector()
-    
+
     # Create MCP server
     server = create_simple_server(
         schema_string=schema,
         query_executor_callback=dummy_query_executor,
-        server_name="Simple-TextQL-MCP-Server"
+        server_name="Simple-TextQL-MCP-Server",
     )
-    
+
     # Run server
     host = os.environ.get("MCP_HOST", "0.0.0.0")
     port = int(os.environ.get("MCP_PORT", "8000"))

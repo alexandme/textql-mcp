@@ -1,5 +1,5 @@
 """
-TextQL MCP Server - A standalone library for creating an MCP server that translates 
+TextQL MCP Server - A standalone library for creating an MCP server that translates
 natural language to Graph Query Language (GQL).
 """
 

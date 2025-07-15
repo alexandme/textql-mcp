@@ -6,7 +6,7 @@ can be used with the TextQL MCP Server.
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, Callable
 
 # Import Spanner-related libraries if SpannerQueryExecutor is used
 try:
@@ -147,7 +147,7 @@ class SpannerQueryExecutor:
         if not SPANNER_AVAILABLE:
             raise ImportError(
                 "Google Spanner dependencies not available. "
-                "Install with: pip install langchain-google-spanner google-cloud-spanner"
+                "Install with: pip install google-cloud-spanner"
             )
 
         if not instance_id or not database_id:
@@ -171,35 +171,32 @@ class SpannerQueryExecutor:
             logger.error(f"Failed to initialize Spanner client: {e}", exc_info=True)
             raise RuntimeError(f"Spanner client initialization failed: {e}") from e
 
-        # Cache for graph stores per agent type to avoid re-initialization
-        self._graph_store_cache = {}
+        # Cache for database instances per agent type to avoid re-initialization
+        self._database_cache = {}
 
-    def _get_graph_store(self, agent_type: str = "default") -> Any:
-        """Gets or initializes the SpannerGraphStore."""
-        if agent_type not in self._graph_store_cache:
+    def _get_database(self, agent_type: str = "default") -> Any:
+        """Gets or initializes the Spanner database instance."""
+        if agent_type not in self._database_cache:
             try:
                 logger.info(
-                    f"Initializing SpannerGraphStore for graph '{self.graph_name}'"
+                    f"Initializing Spanner database for instance='{self.instance_id}', "
+                    f"database='{self.database_id}'"
                 )
 
-                # Import here to avoid dependency issues if not installed
-                from langchain_google_spanner import SpannerGraphStore
+                # Get instance and database
+                instance = self.spanner_client.instance(self.instance_id)
+                database = instance.database(self.database_id)
 
-                self._graph_store_cache[agent_type] = SpannerGraphStore(
-                    instance_id=self.instance_id,
-                    database_id=self.database_id,
-                    graph_name=self.graph_name,
-                    client=self.spanner_client,
-                )
+                self._database_cache[agent_type] = database
             except Exception as e:
                 logger.error(
-                    f"Failed to initialize SpannerGraphStore: {e}",
+                    f"Failed to initialize Spanner database: {e}",
                     exc_info=True,
                 )
                 raise RuntimeError(
-                    f"SpannerGraphStore initialization failed: {e}"
+                    f"Spanner database initialization failed: {e}"
                 ) from e
-        return self._graph_store_cache[agent_type]
+        return self._database_cache[agent_type]
 
     def execute_query(self, query: str, agent_type: str = "default") -> Dict[str, Any]:
         """
@@ -212,12 +209,12 @@ class SpannerQueryExecutor:
         Returns:
             Query results as a dictionary containing 'result' and 'error' keys
         """
-        logger.info(f"Executing direct Spanner GQL for agent_type='{agent_type}'")
-        logger.debug(f"GQL query: {query[:200]}...")
+        logger.info(f"Executing direct Spanner SQL for agent_type='{agent_type}'")
+        logger.debug(f"SQL query: {query[:200]}...")
 
         try:
-            # Get the graph store
-            graph_store = self._get_graph_store(agent_type)
+            # Get the database instance
+            database = self._get_database(agent_type)
 
             # Add LIMIT if not present (for safety)
             query_lower = query.lower()
@@ -227,11 +224,19 @@ class SpannerQueryExecutor:
                     query = query[:-1]
                 query += " LIMIT 100"
 
-            # Note: SpannerGraphStore.query() expects standard SQL without GRAPH clause
             logger.info(f"Executing SQL query: {query}")
 
-            # Execute the GQL query directly
-            raw_results = graph_store.query(query)
+            # Execute the query using a snapshot for read-only access
+            raw_results = []
+            with database.snapshot() as snapshot:
+                results = snapshot.execute_sql(query)
+                # Convert results to list of dictionaries
+                for row in results:
+                    # Convert Row to dict
+                    row_dict = {}
+                    for idx, field in enumerate(results.fields):
+                        row_dict[field.name] = row[idx]
+                    raw_results.append(row_dict)
 
             # Format results
             import json
@@ -247,7 +252,7 @@ class SpannerQueryExecutor:
 
         except Exception as e:
             logger.error(
-                f"GQL execution failed for agent_type '{agent_type}': {e}",
+                f"SQL execution failed for agent_type '{agent_type}': {e}",
                 exc_info=True,
             )
             return {

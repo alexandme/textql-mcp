@@ -5,7 +5,6 @@ This provider uses the GraphQL schema defined for the Wikidata-to-Spanner pipeli
 
 import os
 import logging
-from typing import Dict, Any, Optional
 from pathlib import Path
 
 from textql_mcp.utils.schema_provider import FileSchemaProvider

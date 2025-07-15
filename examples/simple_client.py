@@ -29,10 +29,7 @@ async def query_graph(
     Returns:
         Dict containing the response
     """
-    result = await client.tools.query_graph(
-        gql_query=query, 
-        agent_type=agent_type
-    )
+    result = await client.tools.query_graph(gql_query=query, agent_type=agent_type)
     return result
 
 
@@ -51,8 +48,7 @@ async def translate_to_gql(
         Dict containing the translated GraphQL query
     """
     result = await client.tools.translate_to_gql(
-        natural_language_query=natural_language_query, 
-        agent_type=agent_type
+        natural_language_query=natural_language_query, agent_type=agent_type
     )
     return result
 
@@ -72,8 +68,7 @@ async def process_query(
         Dict containing the query results
     """
     result = await client.tools.process_natural_language_query(
-        natural_language_query=natural_language_query, 
-        agent_type=agent_type
+        natural_language_query=natural_language_query, agent_type=agent_type
     )
     return result
 
@@ -116,7 +111,7 @@ async def run_example_queries(client: Client) -> None:
     """
     # Example queries
     nl_query = "Get me a list of all employees in the sales department"
-    gql_query = "{ employees(department: \"Sales\") { id, name, position } }"
+    gql_query = '{ employees(department: "Sales") { id, name, position } }'
 
     # Get schema
     print("\nGetting schema...")
@@ -146,9 +141,7 @@ async def main() -> None:
     """Main function to demonstrate the MCP client usage."""
     # Server connection parameters
     server_params = StdioServerParameters(
-        command="python",
-        args=["-m", "textql_mcp"],
-        env=None
+        command="python", args=["-m", "textql_mcp"], env=None
     )
 
     try:
@@ -158,7 +151,7 @@ async def main() -> None:
             async with ClientSession(*transport) as session:
                 # Create client
                 client = Client(session)
-                
+
                 # Check server health
                 health = await check_health(client)
                 print(f"Server health: {health}")

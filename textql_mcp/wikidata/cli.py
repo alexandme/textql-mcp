@@ -65,7 +65,7 @@ def ingest_wikidata(
     click.echo(f"{'='*60}")
 
     # Display configuration
-    click.echo(f"\nConfiguration:")
+    click.echo("\nConfiguration:")
     click.echo(f"  Config file: {config}")
     click.echo(f"  Dry run: {dry_run}")
     click.echo(f"  Limit: {limit if limit else 'No limit'}")

@@ -7,8 +7,7 @@ can be used with the TextQL MCP Server.
 
 import os
 import logging
-from typing import Dict, Any, Optional, List
-import json
+from typing import Dict, Optional
 
 # Import Spanner-related libraries if available
 try:

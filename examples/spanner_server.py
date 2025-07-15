@@ -13,7 +13,8 @@ import logging
 # Make sure textql_mcp is in the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from textql_mcp.main import create_mcp_server_with_spanner, run_server
+from textql_mcp.main import run_server
+from textql_mcp.main_spanner import create_mcp_server_with_spanner
 from textql_mcp.utils.schema_provider import StringSchemaProvider
 from textql_mcp.utils.ambiguity_detector import SimpleAmbiguityDetector
 
@@ -28,7 +29,9 @@ logger = logging.getLogger("spanner_example")
 
 def parse_args():
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="TextQL MCP Server with Google Spanner")
+    parser = argparse.ArgumentParser(
+        description="TextQL MCP Server with Google Spanner"
+    )
 
     # Basic server configuration
     parser.add_argument(
@@ -98,7 +101,8 @@ def main():
 
     # Set up a custom schema provider (optional)
     # You could also implement a provider that fetches the schema from Spanner
-    schema_provider = StringSchemaProvider("""
+    schema_provider = StringSchemaProvider(
+        """
     type Query {
         # This is a placeholder schema
         # The actual schema would be derived from Spanner
@@ -123,11 +127,14 @@ def main():
         type: String!
         target: Entity
     }
-    """)
+    """
+    )
 
     try:
         # Create MCP server with Spanner backend
-        logger.info(f"Creating TextQL MCP Server with Spanner: instance={args.instance_id}, database={args.database_id}")
+        logger.info(
+            f"Creating TextQL MCP Server with Spanner: instance={args.instance_id}, database={args.database_id}"
+        )
 
         # Determine project IDs
         spanner_project_id = args.project_id
@@ -136,9 +143,6 @@ def main():
         server = create_mcp_server_with_spanner(
             instance_id=args.instance_id,
             database_id=args.database_id,
-            llm_project_id=llm_project_id,
-            llm_location=args.vertex_location,
-            llm_model_name=args.vertex_model,
             schema_provider=schema_provider,
             ambiguity_detector=SimpleAmbiguityDetector(),
             server_name=args.name,
@@ -151,7 +155,9 @@ def main():
 
     except ImportError as e:
         logger.error(f"Missing dependencies: {e}")
-        logger.error("Make sure to install the Spanner dependencies with: pip install textql-mcp[spanner]")
+        logger.error(
+            "Make sure to install the Spanner dependencies with: pip install textql-mcp[spanner]"
+        )
         sys.exit(1)
     except Exception as e:
         logger.error(f"Error creating or running server: {e}", exc_info=True)
