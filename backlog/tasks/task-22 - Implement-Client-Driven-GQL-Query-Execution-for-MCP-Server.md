@@ -1,10 +1,10 @@
 ---
 id: task-22
 title: Implement Client-Driven GQL Query Execution for MCP Server
-status: In Progress
+status: Done
 assignee: []
 created_date: '2025-07-14'
-updated_date: '2025-07-14'
+updated_date: '2025-07-15'
 labels: []
 dependencies: []
 ---
@@ -59,3 +59,20 @@ Following MCP best practices, refactor the server to focus on simple tool execut
    - Document client-driven workflow
    - Provide example GQL queries for common operations
    - Update server documentation to reflect MCP alignment
+
+## Implementation Notes
+
+Implemented client-driven GQL query execution following MCP best practices. Key changes:
+
+- Created SpannerSchemaProvider in textql_mcp/utils/schema_provider_spanner.py that returns schema in client-parseable JSON format
+- Simplified SpannerQueryExecutor to only execute pre-generated GQL queries, removing all NL handling
+- Deprecated server-side NL tools (translate_to_gql and process_natural_language_query)
+- Updated query_graph tool to execute client-generated GQL directly
+- Added error key in all responses to enable client-side iteration
+- Created test_client_driven_workflow.py demonstrating the new workflow
+- Updated main_spanner.py to integrate the new components
+
+The server now follows MCP principles where clients handle complex logic (NL-to-GQL translation) while the server provides simple, secure tool execution. Clients fetch schema, generate GQL using their LLM, execute queries, and iterate on errors.
+
+Branch: task-22-client-driven-gql
+Commit: d22564c
