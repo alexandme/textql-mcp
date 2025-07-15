@@ -227,11 +227,8 @@ class SpannerQueryExecutor:
                     query = query[:-1]
                 query += " LIMIT 100"
 
-            # Ensure GRAPH clause is present
-            if "graph" not in query_lower:
-                query += f" GRAPH {self.graph_name}"
-
-            logger.info(f"Executing GQL: {query}")
+            # Note: SpannerGraphStore.query() expects standard SQL without GRAPH clause
+            logger.info(f"Executing SQL query: {query}")
 
             # Execute the GQL query directly
             raw_results = graph_store.query(query)

@@ -15,11 +15,11 @@ Following MCP best practices, refactor the server to focus on simple tool execut
 
 ## Acceptance Criteria
 
-- [ ] Schema provider returns Spanner schema in client-friendly format
-- [ ] Query executor accepts pre-generated GQL queries only
-- [ ] Server-side NL handling is removed
-- [ ] Error responses enable client-side iteration
-- [ ] Direct GQL execution works correctly against Spanner
+- [x] Schema provider returns Spanner schema in client-friendly format
+- [x] Query executor accepts pre-generated GQL queries only
+- [x] Server-side NL handling is removed
+- [x] Error responses enable client-side iteration
+- [x] Direct GQL execution works correctly against Spanner
 
 ## Implementation Plan
 
