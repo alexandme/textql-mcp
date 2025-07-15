@@ -23,4 +23,11 @@ Migrate Spanner query execution from langchain-google-spanner wrapper to direct 
 
 ## Implementation Plan
 
-1. Remove langchain-google-spanner from requirements-spanner.txt\n2. Update query_executor.py to use google-cloud-spanner directly for query execution\n3. Implement a simple wrapper if needed to maintain interface\n4. Update any dependent code in main_spanner.py if necessary\n5. Run tests to verify functionality\n6. Remove any unused LangChain imports
+1. Replace SpannerGraphStore with direct google-cloud-spanner client usage in query_executor.py
+2. Update query execution to use database.snapshot().execute_sql()
+3. Ensure result format compatibility with existing code
+4. Remove langchain-google-spanner from requirements-spanner.txt
+5. Update error messages and imports
+6. Test with various query types
+7. Remove unused langchain dependencies
+8. Update documentation if needed
