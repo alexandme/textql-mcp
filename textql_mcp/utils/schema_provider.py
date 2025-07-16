@@ -11,7 +11,7 @@ from typing import Dict, Optional
 
 # Import Spanner-related libraries if available
 try:
-    from google.cloud import spanner
+    import google.cloud.spanner  # noqa: F401
 
     SPANNER_AVAILABLE = True
 except ImportError:

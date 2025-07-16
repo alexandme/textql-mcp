@@ -19,9 +19,9 @@ SCRIPT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 # Make sure textql_mcp is in the path
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from textql_mcp.main_spanner import create_mcp_server_with_spanner
-from textql_mcp.core.server import run_server
-from textql_mcp.utils.ambiguity_detector import SimpleAmbiguityDetector
+from textql_mcp.main_spanner import create_mcp_server_with_spanner  # noqa: E402
+from textql_mcp.core.server import run_server  # noqa: E402
+from textql_mcp.utils.ambiguity_detector import SimpleAmbiguityDetector  # noqa: E402
 
 # Set up logging
 logging.basicConfig(
