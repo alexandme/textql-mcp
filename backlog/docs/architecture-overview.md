@@ -43,7 +43,28 @@ Core components:
 - **Utilities**: Modular classes in `utils/` for query execution, schema provision, and ambiguity detection.
 - **Configuration**: YAML files (e.g., `config/wikidata_poc.yaml`) for Spanner credentials and settings.
 - **Integrations**: Google Cloud Spanner via direct `google-cloud-spanner` client for database interactions.
-- **Command-Line Interface**: `textql_mcp/__main__.py` provides a CLI entry point for the server.
+
+### Directory Structure
+
+```
+textql-mcp/
+├── spanner_wikidata_server.py     # Main entry point
+├── run_mcp_server.sh              # Shell script to launch server
+├── textql_mcp/
+│   ├── core/
+│   │   └── server.py              # MCP server framework
+│   ├── main_spanner.py            # Spanner integration factory
+│   └── utils/
+│       ├── query_executor.py      # Direct Spanner SQL execution
+│       ├── schema_provider.py     # Schema information base
+│       ├── schema_provider_spanner.py # Spanner-specific schema provider
+│       └── ambiguity_detector.py  # Query ambiguity detection
+├── config/
+│   └── wikidata_poc.yaml          # Spanner configuration
+├── tests/                         # Unit tests
+├── backlog/                       # Task management and documentation
+└── requirements*.txt              # Dependencies
+```
 
 Data flow:
 1. Client sends GQL query via MCP tool (e.g., `query_graph`).
@@ -84,8 +105,6 @@ sequenceDiagram
         run_server(server)
     ```
 
-- **`textql_mcp/__main__.py`**: Command-line interface for running the server with various configuration options.
-
 ### Factory and Core Server
 - **`textql_mcp/main_spanner.py`**: Factory for Spanner integration.
   - `create_mcp_server_with_spanner(config, credentials)`: Initializes `SpannerQueryExecutor` and `SpannerSchemaProvider`, then calls `create_mcp_server()` from core.
@@ -123,7 +142,13 @@ Code flow example (from client request to response):
 - **Query Execution**: Standard SQL on graph-like data via database snapshots (no native GRAPH support currently).
 - **Authentication**: Service accounts or Application Default Credentials (ADC).
 - **Configuration**: YAML specifies project ID, instance, database, etc.
-- **Implementation Note**: As of task-23, the system uses the native Google Cloud Spanner client directly for better control and reduced dependencies. Legacy code and unused files have been removed to streamline the codebase.
+- **Implementation Note**: As of task-23, the system uses the native Google Cloud Spanner client directly for better control and reduced dependencies.
+
+### Recent Refactoring (January 2025)
+The codebase has been significantly streamlined by removing legacy and unused files:
+- **Removed Files**: `textql_mcp/main.py`, `textql_mcp/schema.graphql`, entire `examples/` directory, `check_dependencies.py`, `setup_env.sh`, `start_server.sh`, `wikidata_schema_provider.py`, `usage_guide.md`, `test_permissions.txt`
+- **Benefits**: Cleaner architecture, reduced confusion, minimal dependencies
+- **Current Dependencies**: pytest, black, ruff, mcp, pydantic, google-cloud-spanner
 
 ### MCP Protocol
 - Tools: `query_graph` for direct GQL execution, `get_schema_for_query` for schema subsets.
@@ -143,14 +168,40 @@ Code flow example (from client request to response):
   ```bash
   ./run_mcp_server.sh
   ```
-- **Environment**: Python 3.11, Conda env 'textql-mcp', minimal dependencies in requirements.txt (pytest, black, ruff, mcp, pydantic) and Spanner-specific dependencies in requirements-spanner.txt.
+- **Environment**: Python 3.11, Conda env 'textql-mcp', minimal dependencies:
+  - Core: pytest, black, ruff, mcp, pydantic (in requirements.txt)
+  - Spanner: google-cloud-spanner and related packages (in requirements-spanner.txt)
 - **Logging**: INFO/DEBUG levels for query execution and errors.
 
 ## Testing and Validation
 
 - **Unit Tests**: In `tests/` (e.g., test_schema_provider.py, test_config.py).
 - **Integration Tests**: Scripts like `test_client_driven_workflow.py` simulate client-server interactions.
+- **MCP Server Functional Tests**: `tests/test_server_functions.py` provides comprehensive testing of MCP server functionality including tool listing, schema queries, entity retrieval, and relationship queries.
 - **Data Validation**: `verify_spanner_data.py` checks ingested Wikidata integrity.
 - **Manual Testing**: Use tools like `test_mcp_client.py` to query the server.
+- **MCP Client Testing**: The server can be tested directly within MCP-compatible clients (e.g., Cline) using the configured tools.
+
+### Running the Test Suite
+
+```bash
+# Run the MCP server functional tests
+cd tests && python test_server_functions.py
+
+# Or run all unit tests
+pytest tests/
+
+# Run data validation
+python verify_spanner_data.py
+
+# Test client-driven workflow
+python test_client_driven_workflow.py
+```
+
+### Current Data Statistics (as of January 2025)
+- Total entities: 910,200
+- Entity types: Unknown (527,286), Human (332,613), Organization (48,883), City (1,418)
+- Total edges: 25,002
+- Edge types: OCCUPATION (13,000), SUBCLASS_OF (9,999), INSTANCE_OF (2,000)
 
 This overview is based on the current implementation as of the latest project state. For updates, refer to backlog/tasks/ and specific file changes.
