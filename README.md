@@ -24,11 +24,18 @@ This library provides a standardized interface for AI models and agents to inter
    cd textql-mcp
    ```
 
-2. Set up the conda environment (requires conda to be installed):
+2. Create and activate the conda environment:
    ```bash
-   source setup_env.sh
+   conda create -n textql-mcp python=3.11 -y
+   conda activate textql-mcp
    ```
-   This will create a new conda environment named `textql` with all required dependencies.
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   pip install -r requirements-spanner.txt  # For Google Cloud Spanner support
+   pip install -e .
+   ```
 
 ### Option 2: Using pip
 
@@ -46,26 +53,38 @@ This library provides a standardized interface for AI models and agents to inter
 
 ## Quick Start
 
-```python
-import asyncio
-from textql_mcp import create_mcp_server
-from textql_mcp.schemas import SimpleSchemaProvider
+### Running with Google Cloud Spanner:
 
-# Create a schema provider
-schema_provider = SimpleSchemaProvider("path/to/schema.sql")
+1. Configure your Google Cloud credentials:
+   ```bash
+   gcloud auth application-default login
+   ```
 
-# Create and start the MCP server
-server = create_mcp_server(
-    schema_provider=schema_provider,
-    port=8000
-)
+2. Create a configuration file (e.g., `config/my_config.yaml`):
+   ```yaml
+   project_id: "my-project-id"
+   instance_id: "my-instance"
+   database_id: "my-database"
+   ```
 
-server.run()
+3. Start the server:
+   ```bash
+   python spanner_wikidata_server.py --config config/my_config.yaml
+   ```
+
+## Running the Server
+
+### For Google Cloud Spanner:
+
+```bash
+# Using the wrapper script
+./run_mcp_server.sh
+
+# Or directly via command line
+python -m textql_mcp --spanner-instance-id=<instance-id> --spanner-database-id=<database-id>
 ```
 
-## Advanced Usage
-
-See the `examples/` directory for complete examples of how to use the TextQL MCP Server with different database backends.
+The server can be configured using YAML configuration files (e.g., `config/wikidata_poc.yaml`).
 
 ## Customization
 

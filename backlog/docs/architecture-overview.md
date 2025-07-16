@@ -43,6 +43,7 @@ Core components:
 - **Utilities**: Modular classes in `utils/` for query execution, schema provision, and ambiguity detection.
 - **Configuration**: YAML files (e.g., `config/wikidata_poc.yaml`) for Spanner credentials and settings.
 - **Integrations**: Google Cloud Spanner via direct `google-cloud-spanner` client for database interactions.
+- **Command-Line Interface**: `textql_mcp/__main__.py` provides a CLI entry point for the server.
 
 Data flow:
 1. Client sends GQL query via MCP tool (e.g., `query_graph`).
@@ -83,7 +84,7 @@ sequenceDiagram
         run_server(server)
     ```
 
-- **`examples/spanner_server.py`**: A generic example for Spanner server setup, distinct from the production Wikidata-specific script.
+- **`textql_mcp/__main__.py`**: Command-line interface for running the server with various configuration options.
 
 ### Factory and Core Server
 - **`textql_mcp/main_spanner.py`**: Factory for Spanner integration.
@@ -122,7 +123,7 @@ Code flow example (from client request to response):
 - **Query Execution**: Standard SQL on graph-like data via database snapshots (no native GRAPH support currently).
 - **Authentication**: Service accounts or Application Default Credentials (ADC).
 - **Configuration**: YAML specifies project ID, instance, database, etc.
-- **Implementation Note**: As of task-23, the system no longer depends on `langchain-google-spanner` wrapper, using the native Google Cloud Spanner client directly for better control and reduced dependencies.
+- **Implementation Note**: As of task-23, the system uses the native Google Cloud Spanner client directly for better control and reduced dependencies. Legacy code and unused files have been removed to streamline the codebase.
 
 ### MCP Protocol
 - Tools: `query_graph` for direct GQL execution, `get_schema_for_query` for schema subsets.
@@ -142,7 +143,7 @@ Code flow example (from client request to response):
   ```bash
   ./run_mcp_server.sh
   ```
-- **Environment**: Python 3.11, Conda env 'textql-mcp', dependencies in requirements.txt and requirements-spanner.txt.
+- **Environment**: Python 3.11, Conda env 'textql-mcp', minimal dependencies in requirements.txt (pytest, black, ruff, mcp, pydantic) and Spanner-specific dependencies in requirements-spanner.txt.
 - **Logging**: INFO/DEBUG levels for query execution and errors.
 
 ## Testing and Validation

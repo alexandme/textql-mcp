@@ -5,18 +5,18 @@ natural language to Graph Query Language (GQL).
 
 from .core.server import (
     create_mcp_server,
+    run_server,
     SchemaProvider,
     QueryExecutor,
     AmbiguityDetector,
 )
-from .main import create_server, create_simple_server, run_server
+from .main_spanner import create_mcp_server_with_spanner
 
 __version__ = "0.1.0"
 
 __all__ = [
     "create_mcp_server",
-    "create_server",
-    "create_simple_server",
+    "create_mcp_server_with_spanner",
     "run_server",
     "SchemaProvider",
     "QueryExecutor",

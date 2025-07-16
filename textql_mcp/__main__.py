@@ -9,7 +9,7 @@ import sys
 import argparse
 import logging
 
-from .main import create_simple_server, run_server
+from .core.server import run_server
 from .main_spanner import create_mcp_server_with_spanner
 from .utils.schema_provider import FileSchemaProvider
 from .utils.query_executor import SPANNER_AVAILABLE
@@ -65,11 +65,6 @@ def parse_args():
     # Add Spanner-specific arguments
     spanner_group = parser.add_argument_group("Google Spanner Configuration")
     spanner_group.add_argument(
-        "--use-spanner",
-        action="store_true",
-        help="Use Google Spanner as the backend",
-    )
-    spanner_group.add_argument(
         "--spanner-instance-id",
         type=str,
         help="Google Spanner instance ID",
@@ -83,26 +78,6 @@ def parse_args():
         "--spanner-project-id",
         type=str,
         help="Google Cloud project ID for Spanner (defaults to ADC)",
-    )
-
-    # Add VertexAI-specific arguments
-    vertex_group = parser.add_argument_group("Google VertexAI Configuration")
-    vertex_group.add_argument(
-        "--vertex-project-id",
-        type=str,
-        help="Google Cloud project ID for VertexAI",
-    )
-    vertex_group.add_argument(
-        "--vertex-location",
-        type=str,
-        default="us-central1",
-        help="Google Cloud location for VertexAI (default: us-central1)",
-    )
-    vertex_group.add_argument(
-        "--vertex-model",
-        type=str,
-        default="gemini-pro",
-        help="Model name for VertexAI (default: gemini-pro)",
     )
 
     return parser.parse_args()
@@ -125,47 +100,35 @@ def main():
     if args.schema:
         schema_provider = FileSchemaProvider(args.schema)
 
-    # Create MCP server with appropriate backend
-    if args.use_spanner:
-        # Validate required Spanner arguments
-        if not SPANNER_AVAILABLE:
-            logger.error(
-                "Google Spanner dependencies not available. Install with: pip install google-cloud-spanner"
-            )
-            sys.exit(1)
+    # Validate required Spanner arguments
+    if not SPANNER_AVAILABLE:
+        logger.error(
+            "Google Spanner dependencies not available. Install with: pip install google-cloud-spanner"
+        )
+        sys.exit(1)
 
-        if not args.spanner_instance_id or not args.spanner_database_id:
-            logger.error(
-                "Spanner instance ID and database ID are required when using Spanner backend"
-            )
-            sys.exit(1)
+    if not args.spanner_instance_id or not args.spanner_database_id:
+        logger.error("Spanner instance ID and database ID are required")
+        sys.exit(1)
 
-        try:
-            # Create MCP server with Spanner backend
-            logger.info(
-                f"Creating TextQL MCP Server with Spanner backend: instance={args.spanner_instance_id}, database={args.spanner_database_id}"
-            )
-            server = create_mcp_server_with_spanner(
-                instance_id=args.spanner_instance_id,
-                database_id=args.spanner_database_id,
-                schema_provider=schema_provider,
-                config_path=args.config,
-                server_name=args.name,
-                spanner_project_id=args.spanner_project_id,
-            )
-        except Exception as e:
-            logger.error(
-                f"Failed to create server with Spanner backend: {e}", exc_info=True
-            )
-            sys.exit(1)
-    else:
-        # Create standard MCP server without Spanner
-        logger.info("Creating standard TextQL MCP Server")
-        server = create_simple_server(
-            schema_file_path=args.schema,
+    try:
+        # Create MCP server with Spanner backend
+        logger.info(
+            f"Creating TextQL MCP Server with Spanner backend: instance={args.spanner_instance_id}, database={args.spanner_database_id}"
+        )
+        server = create_mcp_server_with_spanner(
+            instance_id=args.spanner_instance_id,
+            database_id=args.spanner_database_id,
+            schema_provider=schema_provider,
             config_path=args.config,
             server_name=args.name,
+            spanner_project_id=args.spanner_project_id,
         )
+    except Exception as e:
+        logger.error(
+            f"Failed to create server with Spanner backend: {e}", exc_info=True
+        )
+        sys.exit(1)
 
     # Run server
     logger.info(f"Starting TextQL MCP Server on {args.host}:{args.port}")
