@@ -4,7 +4,7 @@
       "command": "sh",
       "args": [
         "-c",
-        "cd /Users/alexanderalyushin/Documents/Documents/Projects/textql-mcp/zen-mcp-temp/zen-mcp-server && source .zen_venv/bin/activate && python server.py"
+        "cd /Users/alexanderalyushin/Documents/Documents/Projects/zen-mcp-server && source .zen_venv/bin/activate && python server.py"
       ],
       "env": {
         "PATH": "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:~/.local/bin",
