@@ -1,9 +1,10 @@
 ---
 id: task-1
 title: Create graph DB using Cline and grok4 instructions
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-07-11'
+updated_date: '2025-07-21'
 labels: []
 dependencies: []
 ---
