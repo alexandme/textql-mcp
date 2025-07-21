@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "zen": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "cd /Users/alexanderalyushin/Documents/Documents/Projects/textql-mcp/zen-mcp-temp/zen-mcp-server && source .zen_venv/bin/activate && python server.py"
+      ],
+      "env": {
+        "PATH": "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:~/.local/bin",
+        "OPENROUTER_API_KEY": "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"
+      }
+    }
+  }
+}
