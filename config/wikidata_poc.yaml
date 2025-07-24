@@ -113,3 +113,21 @@ data_quality:
     infer_missing_types: true
     normalize_dates: true
     extract_coordinates: true
+
+# Feature Flags Configuration
+feature_flags:
+  # Core functionality flags
+  enable_query_graph: true          # Enable GraphQL query execution
+  enable_schema_fetch: true         # Enable schema information retrieval
+  enable_natural_language: false    # Enable natural language processing (experimental)
+  
+  # Admin and management flags
+  enable_admin_endpoints: false     # Enable admin endpoints for runtime management
+  enable_flag_runtime_updates: false # Allow feature flags to be updated at runtime
+  
+  # Security and access control
+  enable_auth_checks: false         # Enable authentication checks
+  enable_rate_limiting: false       # Enable rate limiting
+  
+  # Experimental features
+  enable_experimental_features: false # Enable experimental features

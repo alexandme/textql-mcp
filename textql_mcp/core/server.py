@@ -16,6 +16,8 @@ import re
 import toml
 from mcp.server.fastmcp import FastMCP, Context
 
+from .feature_flags import FeatureFlagManager, FeatureFlag, feature_flag_required
+
 # Set up logging
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
@@ -125,6 +127,7 @@ class AppContext:
     schema_provider: SchemaProvider
     query_executor: QueryExecutor
     ambiguity_detector: AmbiguityDetector
+    feature_flags: FeatureFlagManager
 
 
 def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
@@ -294,6 +297,9 @@ def create_mcp_server(
     # Load configuration
     config = load_config(config_path)
 
+    # Initialize feature flags
+    feature_flags = FeatureFlagManager(config)
+
     # Use provided components or defaults
     _schema_provider = schema_provider or DefaultSchemaProvider()
     _query_executor = query_executor or DefaultQueryExecutor()
@@ -305,6 +311,7 @@ def create_mcp_server(
         schema_provider=_schema_provider,
         query_executor=_query_executor,
         ambiguity_detector=_ambiguity_detector,
+        feature_flags=feature_flags,
     )
 
     # Define lifespan manager
@@ -346,6 +353,7 @@ def create_mcp_server(
     #     pass
 
     @mcp.tool()
+    @feature_flag_required(FeatureFlag.ENABLE_QUERY_GRAPH)
     def query_graph(
         gql_query: str, agent_type: str = "default", ctx: Context = None
     ) -> Dict[str, Any]:
@@ -406,6 +414,7 @@ def create_mcp_server(
     #     pass
 
     @mcp.tool()
+    @feature_flag_required(FeatureFlag.ENABLE_SCHEMA_FETCH)
     def get_schema_for_query(
         query: str, agent_type: str = "default", ctx: Context = None
     ) -> Dict[str, Any]:
