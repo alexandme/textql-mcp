@@ -100,3 +100,9 @@ neo4j/
 
 # LangChain
 langchain_cache/
+
+# Git worktrees
+worktrees/
+
+# MCP configuration
+.mcp.json
