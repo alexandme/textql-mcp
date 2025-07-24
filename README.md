@@ -132,6 +132,71 @@ Process a natural language query by translating it to `*`QL and executing it.
 **Returns:**
 - Dictionary containing the final results and execution history
 
+## Feature Flags
+
+The TextQL MCP server includes a comprehensive feature flag system that allows you to enable/disable features at runtime without requiring server restarts.
+
+### Configuration
+
+Feature flags can be configured in three ways (in order of precedence):
+
+1. **Environment Variables** (highest priority)
+   ```bash
+   export TEXTQL_FF_ENABLE_QUERY_GRAPH=true
+   export TEXTQL_FF_ENABLE_ADMIN_ENDPOINTS=false
+   ```
+
+2. **Configuration File** (YAML/TOML)
+   ```yaml
+   feature_flags:
+     enable_query_graph: true
+     enable_schema_fetch: true
+     enable_natural_language: false
+     enable_admin_endpoints: false
+   ```
+
+3. **Default Values** (lowest priority)
+
+### Available Feature Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `enable_query_graph` | Enable GraphQL query execution | `true` |
+| `enable_schema_fetch` | Enable schema information retrieval | `true` |
+| `enable_natural_language` | Enable natural language processing (experimental) | `false` |
+| `enable_admin_endpoints` | Enable admin endpoints for runtime management | `false` |
+| `enable_flag_runtime_updates` | Allow feature flags to be updated at runtime | `false` |
+| `enable_auth_checks` | Enable authentication checks | `false` |
+| `enable_rate_limiting` | Enable rate limiting | `false` |
+| `enable_experimental_features` | Enable experimental features | `false` |
+
+### Usage in Code
+
+```python
+from textql_mcp.core.feature_flags import FeatureFlag, feature_flag_required
+
+# Protect a tool with a feature flag
+@mcp.tool()
+@feature_flag_required(FeatureFlag.ENABLE_QUERY_GRAPH)
+def query_graph(gql_query: str, ctx: Context = None):
+    # Tool implementation
+    pass
+
+# Check feature flags programmatically
+if check_feature_flag(ctx, FeatureFlag.ENABLE_EXPERIMENTAL_FEATURES):
+    # Execute experimental code
+    pass
+```
+
+### Runtime Updates
+
+If `enable_flag_runtime_updates` is enabled, you can update feature flags at runtime:
+
+```python
+feature_flags = ctx.lifespan_ctx.feature_flags
+feature_flags.set_flag(FeatureFlag.ENABLE_ADMIN_ENDPOINTS, True)
+```
+
 ## License
 
 Apache 2.0 License
